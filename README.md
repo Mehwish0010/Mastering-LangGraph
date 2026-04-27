@@ -1,6 +1,6 @@
 # LangGraph Agentic Patterns
 
-Beginner-friendly examples of **Agentic Design Patterns** using [LangGraph](https://github.com/langchain-ai/langgraph) and Google Gemini.
+Beginner-friendly examples of **Agentic Design Patterns** using [LangGraph](https://github.com/langchain-ai/langgraph) and Google Gemini and Groq.
 
 ---
 
