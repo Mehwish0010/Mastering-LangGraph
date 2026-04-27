@@ -245,6 +245,53 @@ python pattern_6_planning.py
 
 ---
 
+## Pattern 7 — Multi-Agent (`pattern_7_multi_agent.py`)
+
+The multi-agent pattern uses a **supervisor** that routes user queries to specialized agents based on the topic.
+
+```
+[User Message] --> [Supervisor] --weather--> [Weather Agent] --> Output
+                                --math-----> [Calculator Agent] --> Output
+                                --news-----> [News Agent] --> Output
+                                --done-----> END
+```
+
+**How it works:**
+1. **Supervisor** — Uses structured output to classify the query and pick the right agent.
+2. **Weather Agent** — Handles weather-related questions.
+3. **News Agent** — Handles news-related questions.
+4. **Calculator Agent** — Handles math problems.
+
+```python
+supervisor_model = llm.with_structured_output(Router)
+
+workflow.add_conditional_edges(
+    "supervisor", route_to_agent,
+    {"weather_agent": "weather_agent", "news_agent": "news_agent",
+     "calculator_agent": "calculator_agent", "__end__": END}
+)
+```
+
+**Key concepts:**
+- **Structured Output** — Supervisor returns a Pydantic model (`Router`) with `next_agent` and `reasoning`.
+- **Supervisor Pattern** — A central node decides which specialized agent handles the task.
+- **Multi-Agent Routing** — Different agents for different domains, all orchestrated by one supervisor.
+
+**Tests:**
+
+| Test | What it does |
+|------|-------------|
+| `test_weather` | Routes weather question to weather agent |
+| `test_calculator` | Routes math question to calculator agent |
+| `test_news` | Routes news question to news agent |
+| `test_end` | Routes goodbye to `__end__` |
+
+```bash
+python pattern_7_multi_agent.py
+```
+
+---
+
 ## Project Structure
 
 ```
@@ -255,6 +302,7 @@ prompt-chaining/
 ├── pattern_4_reflection.py       # Pattern 4: Reflection (Groq)
 ├── pattern_5_tooluse.py          # Pattern 5: Tool use (Groq)
 ├── pattern_6_planning.py         # Pattern 6: Planning (Groq)
+├── pattern_7_multi_agent.py      # Pattern 7: Multi-agent (Groq)
 ├── .env                          # Your API keys (not committed)
 ├── .gitignore                    # Ignores .env and cache files
 └── README.md                     # This file
@@ -286,5 +334,5 @@ LANGCHAIN_PROJECT=pattern-1-test
 
 - Python 3.10+
 - Google Gemini API key (patterns 1-3)
-- Groq API key (patterns 4-6)
+- Groq API key (patterns 4-7)
 - (Optional) LangSmith API key for tracing
