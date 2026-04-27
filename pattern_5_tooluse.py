@@ -7,7 +7,7 @@ from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
 from langchain_core.messages import AnyMessage, HumanMessage
 from langgraph.graph.message import add_messages
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from langchain_core.tools import tool
 from dotenv import load_dotenv
 
@@ -35,9 +35,9 @@ def get_weather(city: str) -> str:
     return data.get(city, f"No data for {city}")
 
 # LLM with tools
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    api_key=os.getenv("GOOGLE_API_KEY")
+llm = ChatGroq(
+    model="llama-3.3-70b-versatile",
+    api_key=os.getenv("GROQ_API_KEY")
 )
 tools = [calculator, get_weather]
 model_with_tools = llm.bind_tools(tools)
