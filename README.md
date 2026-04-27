@@ -1,4 +1,4 @@
-# Prompt Chaining with LangGraph
+#  Pattern 01 _Prompt Chaining with LangGraph
 
 A beginner-friendly example of the **Prompt Chaining** pattern using [LangGraph](https://github.com/langchain-ai/langgraph) and Google Gemini.
 
