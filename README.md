@@ -126,6 +126,92 @@ python pattern_3_parallelization.py
 
 ---
 
+## Pattern 4 — Reflection (`pattern_4_reflection.py`)
+
+The reflection pattern generates a draft, evaluates it, and iteratively refines it based on feedback — looping until the output is approved or a max iteration limit is reached.
+
+```
+[Generate Draft] --> [Evaluate] --APPROVED--> [Finalize] --> Output
+                        |                         ↑
+                        └──needs work──> [Generate Draft] (retry)
+```
+
+**How it works:**
+1. **Generate Node** — Writes a draft (or improves it using previous feedback).
+2. **Evaluate Node** — Reviews the draft and either approves it or gives feedback.
+3. **Decide Next** — Routes to finalize if approved or max iterations (3) reached, otherwise loops back.
+4. **Finalize Node** — Returns the final approved draft.
+
+```python
+workflow.add_conditional_edges(
+    "evaluate",
+    decide_next,
+    {"refine": "generate", "finalize": "finalize"}
+)
+```
+
+**Key concepts:**
+- **Iterative Looping** — The graph can loop back to a previous node based on conditions.
+- **Max Iterations** — A safety cap to prevent infinite loops.
+
+**Tests:**
+
+| Test | What it does |
+|------|-------------|
+| `test_full_loop` | Runs the full generate-evaluate loop end-to-end |
+| `test_generate_node` | Tests the generate node in isolation |
+| `test_decide_next` | Tests the routing logic without LLM |
+
+```bash
+python pattern_4_reflection.py
+```
+
+---
+
+## Pattern 5 — Tool Use (`pattern_5_tooluse.py`)
+
+The tool use pattern gives the LLM access to external tools (functions) that it can call when needed, creating a ReAct-style agent loop.
+
+```
+[User Message] --> [Agent] --tool call--> [Tool Node] --> [Agent] --> Output
+                      |                                      ↑
+                      └──no tool needed──> Output             |
+                                                              └── (loop if more tools needed)
+```
+
+**How it works:**
+1. **Agent Node** — The LLM decides whether to call a tool or respond directly.
+2. **Tool Node** — Executes the tool and returns the result to the agent.
+3. **Router** — Checks if the LLM made a tool call; if yes, routes to tools, otherwise ends.
+
+```python
+workflow.add_conditional_edges("agent", should_continue, ["tools", END])
+workflow.add_edge("tools", "agent")
+```
+
+**Key concepts:**
+- **Tool Binding** — `llm.bind_tools(tools)` gives the LLM awareness of available tools.
+- **ToolNode** — LangGraph's built-in node that executes tool calls automatically.
+- **ReAct Loop** — Agent reasons, acts (calls tool), observes result, and repeats if needed.
+
+**Tools included:**
+- `calculator` — Evaluates math expressions
+- `get_weather` — Returns mock weather data for cities
+
+**Tests:**
+
+| Test | What it does |
+|------|-------------|
+| `test_calculator` | Asks a math question, expects tool use |
+| `test_weather` | Asks for weather, expects tool use |
+| `test_no_tool` | Simple greeting, expects direct response |
+
+```bash
+python pattern_5_tooluse.py
+```
+
+---
+
 ## Project Structure
 
 ```
@@ -133,6 +219,8 @@ prompt-chaining/
 ├── pattern_1_prompt-chaining.py  # Pattern 1: Prompt chaining
 ├── pattern_2_routing.py          # Pattern 2: Routing
 ├── pattern_3_parallelization.py  # Pattern 3: Parallelization
+├── pattern_4_reflection.py       # Pattern 4: Reflection
+├── pattern_5_tooluse.py          # Pattern 5: Tool use
 ├── .env                          # Your API keys (not committed)
 ├── .gitignore                    # Ignores .env and cache files
 └── README.md                     # This file
