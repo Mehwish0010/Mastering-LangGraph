@@ -88,12 +88,51 @@ python pattern_2_routing.py
 
 ---
 
+## Pattern 3 — Parallelization (`pattern_3_parallelization.py`)
+
+The parallelization pattern runs multiple LLM calls at the same time (fan-out), then combines the results in a single step (fan-in).
+
+```
+              ┌--> [Summarize]  --┐
+Input Text -->├--> [Critique]   --├--> [Combine] --> Final Output
+              └--> [Keywords]   --┘
+```
+
+**How it works:**
+1. **Summarize Node** — Generates a 1-2 sentence summary of the input.
+2. **Critique Node** — Provides a brief critique of the input.
+3. **Keywords Node** — Extracts 5 keywords from the input.
+4. **Combine Node** — Synthesizes all three outputs into a final result.
+
+```python
+# Fan-out: all three run in parallel from START
+workflow.add_edge(START, "summarize")
+workflow.add_edge(START, "critique")
+workflow.add_edge(START, "keywords")
+
+# Fan-in: all three feed into combine
+workflow.add_edge("summarize", "combine")
+workflow.add_edge("critique", "combine")
+workflow.add_edge("keywords", "combine")
+```
+
+**Key concepts:**
+- **Fan-out / Fan-in** — Multiple nodes start from the same point and converge at a single node.
+- **Annotated State with `operator.add`** — Allows multiple nodes to append to the same list without overwriting each other.
+
+```bash
+python pattern_3_parallelization.py
+```
+
+---
+
 ## Project Structure
 
 ```
 prompt-chaining/
 ├── pattern_1_prompt-chaining.py  # Pattern 1: Prompt chaining
 ├── pattern_2_routing.py          # Pattern 2: Routing
+├── pattern_3_parallelization.py  # Pattern 3: Parallelization
 ├── .env                          # Your API keys (not committed)
 ├── .gitignore                    # Ignores .env and cache files
 └── README.md                     # This file
