@@ -212,15 +212,49 @@ python pattern_5_tooluse.py
 
 ---
 
+## Pattern 6 — Planning (`pattern_6_planning.py`)
+
+The planning pattern creates a plan first, then executes research tasks in parallel, and synthesizes everything into a final report.
+
+```
+[Create Plan] --> [Research Tech]   --┐
+              --> [Research Market] --├--> [Synthesize Report] --> Output
+```
+
+**How it works:**
+1. **Planner Node** — Creates a 3-5 step plan for the given task.
+2. **Research Tech Node** — Researches technical aspects (runs in parallel).
+3. **Research Market Node** — Researches market aspects (runs in parallel).
+4. **Synthesize Node** — Combines all research into a final 3-paragraph report.
+
+```python
+workflow.add_edge("planner", "research_tech")
+workflow.add_edge("planner", "research_market")
+workflow.add_edge("research_tech", "synthesize")
+workflow.add_edge("research_market", "synthesize")
+```
+
+**Key concepts:**
+- **Plan-then-Execute** — The LLM creates a plan before doing the work.
+- **Custom Reducer (`merge_dicts`)** — Merges parallel research results into a single dict without overwriting.
+- **Parallel Research** — Multiple research nodes fan out from the planner and converge at synthesis.
+
+```bash
+python pattern_6_planning.py
+```
+
+---
+
 ## Project Structure
 
 ```
 prompt-chaining/
-├── pattern_1_prompt-chaining.py  # Pattern 1: Prompt chaining
-├── pattern_2_routing.py          # Pattern 2: Routing
-├── pattern_3_parallelization.py  # Pattern 3: Parallelization
-├── pattern_4_reflection.py       # Pattern 4: Reflection
-├── pattern_5_tooluse.py          # Pattern 5: Tool use
+├── pattern_1_prompt-chaining.py  # Pattern 1: Prompt chaining (Gemini)
+├── pattern_2_routing.py          # Pattern 2: Routing (Gemini)
+├── pattern_3_parallelization.py  # Pattern 3: Parallelization (Gemini)
+├── pattern_4_reflection.py       # Pattern 4: Reflection (Groq)
+├── pattern_5_tooluse.py          # Pattern 5: Tool use (Groq)
+├── pattern_6_planning.py         # Pattern 6: Planning (Groq)
 ├── .env                          # Your API keys (not committed)
 ├── .gitignore                    # Ignores .env and cache files
 └── README.md                     # This file
@@ -231,30 +265,26 @@ prompt-chaining/
 ### 1. Install dependencies
 
 ```bash
-pip install langgraph langchain-google-genai langsmith python-dotenv
+pip install langgraph langchain-google-genai langchain-groq langsmith python-dotenv
 ```
 
 ### 2. Create a `.env` file
 
 ```
 GOOGLE_API_KEY=your-google-api-key-here
+GROQ_API_KEY=your-groq-api-key-here
 LANGCHAIN_TRACING_V2=true
 LANGCHAIN_API_KEY=your-langsmith-api-key-here
 LANGCHAIN_PROJECT=pattern-1-test
 ```
 
 - **Google API Key**: Get one from [Google AI Studio](https://aistudio.google.com/apikey)
+- **Groq API Key**: Get one from [console.groq.com](https://console.groq.com)
 - **LangSmith API Key** (optional): Get one from [smith.langchain.com](https://smith.langchain.com) for tracing/debugging
-
-## What to Try Next
-
-- Add a **third node** (e.g., generate a blog outline from the titles)
-- Try the **parallel pattern** with LangGraph
-- Combine routing + chaining in a single graph
-- Explore [LangGraph documentation](https://langchain-ai.github.io/langgraph/)
 
 ## Requirements
 
 - Python 3.10+
-- Google Gemini API key
+- Google Gemini API key (patterns 1-3)
+- Groq API key (patterns 4-6)
 - (Optional) LangSmith API key for tracing
